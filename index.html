@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Reclutamiento · RRHH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ===================== RESET & BASE ===================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f1117;
+  --bg2: #171a23;
+  --bg3: #1e2130;
+  --bg4: #252840;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --txt: #f0f1f5;
+  --txt2: #9499b0;
+  --txt3: #5c6080;
+  --accent: #4f7cff;
+  --accent2: #3d65e0;
+  --green: #2dd4a0;
+  --green-bg: rgba(45,212,160,0.1);
+  --amber: #f5a623;
+  --amber-bg: rgba(245,166,35,0.1);
+  --red: #f0546a;
+  --red-bg: rgba(240,84,106,0.1);
+  --blue-bg: rgba(79,124,255,0.1);
+  --radius: 10px;
+  --radius-sm: 6px;
+  --font: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+  --sidebar: 210px;
+  --topbar: 56px;
+}
+html, body { height: 100%; background: var(--bg); color: var(--txt); font-family: var(--font); font-size: 14px; line-height: 1.5; }
+a { color: inherit; text-decoration: none; }
+button { font-family: var(--font); cursor: pointer; }
+input, select { font-family: var(--font); }
+
+/* ===================== LAYOUT ===================== */
+#app { display: flex; height: 100vh; overflow: hidden; }
+
+/* Sidebar */
+#sidebar {
+  width: var(--sidebar);
+  flex-shrink: 0;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.sidebar-logo {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.logo-mark {
+  display: inline-flex;
+  width: 32px; height: 32px;
+  background: var(--accent);
+  border-radius: 8px;
+  align-items: center; justify-content: center;
+  margin-bottom: 10px;
+}
+.logo-mark svg { width: 18px; height: 18px; }
+.logo-name { font-size: 13px; font-weight: 600; color: var(--txt); letter-spacing: -0.01em; }
+.logo-sub { font-size: 11px; color: var(--txt3); margin-top: 1px; }
+
+.nav-section { padding: 16px 0 4px; }
+.nav-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--txt3);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 0 16px 6px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--txt2);
+  border-left: 2px solid transparent;
+  cursor: pointer;
+  transition: all .15s;
+  user-select: none;
+}
+.nav-item:hover { background: var(--bg3); color: var(--txt); }
+.nav-item.active { background: var(--bg3); color: var(--txt); border-left-color: var(--accent); font-weight: 500; }
+.nav-badge {
+  margin-left: auto;
+  font-size: 10px;
+  background: var(--blue-bg);
+  color: var(--accent);
+  padding: 1px 7px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+}
+.conn-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+.conn-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-demo { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+.dot-ok   { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.dot-err  { background: var(--red);   box-shadow: 0 0 6px var(--red); }
+.dot-load { background: var(--accent); animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.conn-label { font-weight: 500; color: var(--txt); }
+.conn-detail { font-size: 10px; color: var(--txt3); line-height: 1.4; }
+
+/* Main area */
+#main {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg);
+  min-width: 0;
+}
+
+/* Top bar */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: var(--topbar);
+  background: rgba(15,17,23,0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+}
+.topbar-title { font-size: 15px; font-weight: 600; letter-spacing: -0.02em; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.topbar-sub { font-size: 12px; color: var(--txt3); }
+.tag-sheets {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  background: var(--green-bg);
+  color: var(--green);
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(45,212,160,0.2);
+  font-weight: 500;
+}
+.tag-demo {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  background: var(--amber-bg);
+  color: var(--amber);
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(245,166,35,0.2);
+  font-weight: 500;
+}
+.btn {
+  font-size: 12px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--txt2);
+  transition: all .15s;
+}
+.btn:hover { background: var(--bg4); color: var(--txt); }
+.btn-accent {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  font-weight: 500;
+}
+.btn-accent:hover { background: var(--accent2); }
+
+/* Content */
+.content { padding: 24px 28px 40px; }
+
+/* Loading bar */
+.loading-bar {
+  height: 2px;
+  background: var(--bg3);
+  overflow: hidden;
+}
+.loading-fill {
+  height: 100%;
+  background: var(--accent);
+  animation: loadslide 1.2s ease-in-out infinite;
+}
+@keyframes loadslide { 0%{width:0;margin-left:0} 50%{width:60%;margin-left:20%} 100%{width:0;margin-left:100%} }
+
+/* ===================== CARDS & GRID ===================== */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.kpi-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity .2s;
+}
+.kpi-card:hover::before { opacity: 1; }
+.kpi-label { font-size: 11px; color: var(--txt3); font-weight: 500; text-transform: uppercase; letter-spacing: .05em; }
+.kpi-value { font-size: 28px; font-weight: 600; color: var(--txt); margin: 6px 0 4px; letter-spacing: -0.03em; line-height: 1; }
+.kpi-sub { font-size: 11px; color: var(--txt3); }
+
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+}
+.card-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--txt3);
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  margin-bottom: 14px;
+}
+.two-col { display: grid; grid-template-columns: 3fr 2fr; gap: 14px; margin-bottom: 14px; }
+.two-equal { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* Funnel */
+.funnel-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+.funnel-label { font-size: 11px; color: var(--txt2); width: 130px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.funnel-track { flex: 1; background: var(--bg3); border-radius: 3px; height: 6px; overflow: hidden; }
+.funnel-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width .5s ease; }
+.funnel-n { font-size: 11px; color: var(--txt3); width: 20px; text-align: right; font-variant-numeric: tabular-nums; font-family: var(--mono); }
+
+/* Sources */
+.source-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.source-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.source-label { font-size: 12px; color: var(--txt); flex: 1; }
+.source-val { font-size: 12px; color: var(--txt2); font-variant-numeric: tabular-nums; }
+
+/* Queue */
+.q-item { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.q-item:last-child { border-bottom: none; }
+.q-name { font-size: 12px; font-weight: 500; color: var(--txt); }
+.q-sub { font-size: 11px; color: var(--txt3); margin-top: 1px; }
+.q-tag { font-size: 11px; color: var(--txt3); white-space: nowrap; }
+
+/* Avatars */
+.avatar {
+  display: inline-flex;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--blue-bg);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 600;
+  align-items: center; justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(79,124,255,0.2);
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.badge-green  { background: var(--green-bg); color: var(--green); border: 1px solid rgba(45,212,160,0.2); }
+.badge-amber  { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(245,166,35,0.2); }
+.badge-red    { background: var(--red-bg); color: var(--red); border: 1px solid rgba(240,84,106,0.2); }
+.badge-blue   { background: var(--blue-bg); color: var(--accent); border: 1px solid rgba(79,124,255,0.2); }
+.badge-gray   { background: var(--bg3); color: var(--txt2); border: 1px solid var(--border2); }
+
+/* ===================== KANBAN ===================== */
+.kanban-scroll { overflow-x: auto; padding-bottom: 8px; }
+.kanban { display: flex; gap: 10px; min-width: max-content; }
+.k-col { width: 168px; }
+.k-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 7px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--txt2);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.k-count {
+  font-size: 10px;
+  background: var(--bg4);
+  color: var(--txt3);
+  padding: 1px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+.k-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  transition: border-color .15s;
+}
+.k-card:hover { border-color: var(--border2); }
+.k-name { font-size: 12px; font-weight: 500; color: var(--txt); }
+.k-pos { font-size: 10px; color: var(--txt3); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.k-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 7px; }
+.k-fuente { font-size: 10px; color: var(--txt3); }
+.k-score {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: var(--mono);
+}
+.score-hi { background: rgba(45,212,160,0.15); color: var(--green); }
+.score-mid { background: rgba(245,166,35,0.15); color: var(--amber); }
+.score-no { background: var(--bg3); color: var(--txt3); }
+
+/* ===================== TABLE ===================== */
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.filters input, .filters select {
+  font-size: 12px;
+  padding: 7px 11px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border2);
+  background: var(--bg2);
+  color: var(--txt);
+  outline: none;
+  transition: border-color .15s;
+}
+.filters input:focus, .filters select:focus { border-color: var(--accent); }
+.filters input { flex: 1; min-width: 160px; }
+.filters select option { background: var(--bg2); }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead th {
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--txt3);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  white-space: nowrap;
+}
+tbody td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--txt);
+  vertical-align: middle;
+}
+tbody tr:hover td { background: var(--bg3); }
+.mono { font-family: var(--mono); font-size: 11px; color: var(--txt2); }
+
+/* ===================== JOB CARDS ===================== */
+.job-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.job-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  transition: border-color .15s;
+}
+.job-card:hover { border-color: var(--border2); }
+.job-card.urgent { border-top: 2px solid var(--red); }
+.job-puesto { font-size: 14px; font-weight: 600; color: var(--txt); letter-spacing: -0.01em; }
+.job-area { font-size: 11px; color: var(--txt3); margin-top: 3px; }
+.job-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.job-rango { font-size: 11px; color: var(--txt2); margin-top: 8px; }
+.job-foot {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--txt3);
+}
+
+/* ===================== CONFIG ===================== */
+.cfg-section {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  margin-bottom: 14px;
+  max-width: 580px;
+}
+.cfg-title { font-size: 14px; font-weight: 600; color: var(--txt); margin-bottom: 4px; }
+.cfg-desc { font-size: 12px; color: var(--txt2); margin-bottom: 16px; line-height: 1.6; }
+.cfg-label { font-size: 12px; font-weight: 500; color: var(--txt); margin-bottom: 4px; margin-top: 12px; }
+.cfg-hint { font-size: 11px; color: var(--txt3); margin-bottom: 6px; }
+.cfg-input {
+  width: 100%;
+  font-size: 12px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--txt);
+  outline: none;
+  font-family: var(--mono);
+  margin-bottom: 10px;
+  transition: border-color .15s;
+}
+.cfg-input:focus { border-color: var(--accent); }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.cfg-step { display: flex; gap: 10px; font-size: 12px; color: var(--txt2); padding: 5px 0; align-items: flex-start; line-height: 1.6; }
+.step-n {
+  display: inline-flex;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--blue-bg);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 700;
+  align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+  border: 1px solid rgba(79,124,255,0.2);
+}
+code {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--bg3);
+  color: var(--accent);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+.cfg-alert {
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+.cfg-alert-ok { background: var(--green-bg); color: var(--green); border: 1px solid rgba(45,212,160,0.2); }
+.cfg-alert-err { background: var(--red-bg); color: var(--red); border: 1px solid rgba(240,84,106,0.2); }
+.endpoints-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 8px; }
+.endpoints-table th { text-align: left; padding: 5px 10px; background: var(--bg3); color: var(--txt2); font-weight: 500; border-bottom: 1px solid var(--border); }
+.endpoints-table td { padding: 5px 10px; border-bottom: 1px solid var(--border); color: var(--txt3); font-family: var(--mono); font-size: 10px; }
+.divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+/* ===================== EMPTY & UTILS ===================== */
+.empty { text-align: center; padding: 48px 20px; color: var(--txt3); font-size: 13px; }
+.flex-center { display: flex; align-items: center; gap: 8px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 18 18" fill="none">
+        <rect x="1" y="1" width="7" height="7" rx="1.5" fill="white" opacity=".9"/>
+        <rect x="10" y="1" width="7" height="7" rx="1.5" fill="white" opacity=".9"/>
+        <rect x="1" y="10" width="7" height="7" rx="1.5" fill="white" opacity=".9"/>
+        <rect x="10" y="10" width="7" height="7" rx="1.5" fill="white" opacity=".4"/>
+      </svg>
+    </div>
+    <div class="logo-name">Reclutamiento</div>
+    <div class="logo-sub">Panel de selección</div>
+  </div>
+
+  <nav>
+    <div class="nav-section">
+      <div class="nav-label">Principal</div>
+      <div class="nav-item active" onclick="go('dash')" id="nav-dash">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".8"/>
+          <rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".8"/>
+          <rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".8"/>
+          <rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".35"/>
+        </svg>
+        Inicio
+      </div>
+      <div class="nav-item" onclick="go('pipe')" id="nav-pipe">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="4" width="3.5" height="9" rx="1" fill="currentColor" opacity=".8"/>
+          <rect x="6.25" y="6" width="3.5" height="7" rx="1" fill="currentColor" opacity=".8"/>
+          <rect x="11.5" y="2" width="3.5" height="11" rx="1" fill="currentColor" opacity=".8"/>
+        </svg>
+        Pipeline
+        <span class="nav-badge" id="nb-pipe">—</span>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Datos</div>
+      <div class="nav-item" onclick="go('cands')" id="nav-cands">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+          <circle cx="6" cy="5" r="2.5" fill="currentColor" opacity=".8"/>
+          <path d="M1 14c0-3 2-5 5-5s5 2 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".8"/>
+          <circle cx="12.5" cy="5.5" r="2" fill="currentColor" opacity=".4"/>
+          <path d="M14 14c0-2-1.2-4-3-4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".4"/>
+        </svg>
+        Candidatos
+        <span class="nav-badge" id="nb-cands">—</span>
+      </div>
+      <div class="nav-item" onclick="go('busq')" id="nav-busq">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5" opacity=".8"/>
+          <path d="M5 6h6M5 9.5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".8"/>
+        </svg>
+        Búsquedas
+        <span class="nav-badge" id="nb-busq">—</span>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Sistema</div>
+      <div class="nav-item" onclick="go('cfg')" id="nav-cfg">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.5" opacity=".8"/>
+          <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M11.54 4.46l-1.41 1.41M4.95 11.54l-1.41 1.41" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>
+        </svg>
+        Configuración
+      </div>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="conn-status">
+      <div class="conn-dot dot-demo" id="conn-dot"></div>
+      <span class="conn-label" id="conn-label">Modo demo</span>
+    </div>
+    <div class="conn-detail" id="conn-detail">Conectá tu Sheets en Config</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main id="main">
+  <div id="loading-bar" style="display:none"><div class="loading-bar"><div class="loading-fill"></div></div></div>
+  <div id="topbar-container"></div>
+  <div class="content" id="content"></div>
+</main>
+
+</div>
+
+<script>
+/* ===================== DATOS DEMO ===================== */
+const DEMO = {
+  candidatos: [
+    {id:"C001",id_busqueda:"B001",nombre:"Valeria",apellido:"Fernández",dni:"35.721.489",telefono:"11 5634-2198",fuente:"LinkedIn",etapa_actual:"Entrevista RRHH",estado:"En proceso",score_total:82},
+    {id:"C002",id_busqueda:"B001",nombre:"Hernán",apellido:"Sosa",dni:"28.445.123",telefono:"11 4422-8876",fuente:"Bumeran",etapa_actual:"Psicotécnico",estado:"En proceso",score_total:76},
+    {id:"C003",id_busqueda:"B002",nombre:"Lucía",apellido:"Paz",dni:"40.118.776",telefono:"351 445-9988",fuente:"GetOnBoard",etapa_actual:"Evaluación Técnica",estado:"En proceso",score_total:91},
+    {id:"C004",id_busqueda:"B002",nombre:"Nicolás",apellido:"Rodríguez",dni:"37.004.881",telefono:"11 3344-5566",fuente:"LinkedIn",etapa_actual:"Pre-filtro",estado:"En proceso",score_total:null},
+    {id:"C005",id_busqueda:"B003",nombre:"Camila",apellido:"Torres",dni:"38.992.341",telefono:"11 6677-8899",fuente:"Referido interno",etapa_actual:"Entrevista Final",estado:"Finalista",score_total:88},
+    {id:"C006",id_busqueda:"B003",nombre:"Martín",apellido:"Gutiérrez",dni:"31.223.445",telefono:"261 445-3322",fuente:"ZonaJobs",etapa_actual:"Entrevista RRHH",estado:"En proceso",score_total:72},
+    {id:"C007",id_busqueda:"B005",nombre:"Florencia",apellido:"Medina",dni:"42.118.223",telefono:"11 9988-7766",fuente:"Bumeran",etapa_actual:"CV Recibido",estado:"En revisión",score_total:null},
+    {id:"C008",id_busqueda:"B001",nombre:"Federico",apellido:"López",dni:"33.445.112",telefono:"11 4455-6677",fuente:"Referido externo",etapa_actual:"Descartado",estado:"Descartado",score_total:46},
+    {id:"C009",id_busqueda:"B002",nombre:"Antonella",apellido:"Ruiz",dni:"39.887.221",telefono:"0343 445-9900",fuente:"LinkedIn",etapa_actual:"Propuesta",estado:"En proceso",score_total:94},
+    {id:"C010",id_busqueda:"B004",nombre:"Sebastián",apellido:"Morales",dni:"29.334.567",telefono:"11 5566-7788",fuente:"ZonaJobs",etapa_actual:"Pre-filtro",estado:"En proceso",score_total:null}
+  ],
+  busquedas: [
+    {id:"B001",area:"Finanzas",solicitante:"Diego Mármol",puesto:"Analista Contable Sr",modalidad:"Híbrido",urgencia:"Alta",estado:"Activa",rango_salarial:"$800k–$1.2M ARS bruto",moneda:"ARS",dias_abierta:18},
+    {id:"B002",area:"IT",solicitante:"Verónica Lagos",puesto:"Desarrollador Backend Python",modalidad:"Remoto",urgencia:"Media",estado:"Activa",rango_salarial:"USD 2.500–3.500 neto",moneda:"USD",dias_abierta:32},
+    {id:"B003",area:"RRHH",solicitante:"Claudia Ríos",puesto:"HRBP Senior",modalidad:"Presencial",urgencia:"Alta",estado:"Activa",rango_salarial:"$950k–$1.4M ARS bruto",moneda:"ARS",dias_abierta:7},
+    {id:"B004",area:"Ventas",solicitante:"Santiago Pereyra",puesto:"Ejecutiva Comercial",modalidad:"Presencial",urgencia:"Baja",estado:"En espera",rango_salarial:"$600k + comisiones",moneda:"ARS",dias_abierta:45},
+    {id:"B005",area:"Operaciones",solicitante:"Marcela Vega",puesto:"Coordinadora Logística",modalidad:"Presencial",urgencia:"Media",estado:"Activa",rango_salarial:"$750k–$900k ARS bruto",moneda:"ARS",dias_abierta:12}
+  ]
+};
+
+const ETAPAS = ['CV Recibido','Pre-filtro','Entrevista RRHH','Evaluación Técnica','Psicotécnico','Referencias','Entrevista Final','Propuesta','Ingresado'];
+const FUENTE_COLORS = {'LinkedIn':'#4f7cff','Bumeran':'#f0546a','ZonaJobs':'#f5a623','GetOnBoard':'#a78bfa','Referido interno':'#2dd4a0','Referido externo':'#34d399','Indeed':'#fb923c','Otro':'#6b7280'};
+
+/* ===================== STATE ===================== */
+const S = {
+  view: 'dash',
+  q: '', filtroEtapa: '', filtroBusq: '',
+  scriptUrl: localStorage.getItem('rr_url') || '',
+  isConnected: false, isLoading: false, connError: '',
+  data: JSON.parse(JSON.stringify(DEMO))
+};
+
+/* ===================== HELPERS ===================== */
+const $ = id => document.getElementById(id);
+const initials = (n, a) => ((n||'?')[0] + ((a||'')[0]||'')).toUpperCase();
+const getBusq = bid => S.data.busquedas.find(b => b.id === bid) || {puesto:'—', area:'—'};
+const scoreClass = s => !s ? 'score-no' : s >= 80 ? 'score-hi' : 'score-mid';
+const urgBadge = u => ({ Alta:`<span class="badge badge-red">Alta</span>`, Media:`<span class="badge badge-amber">Media</span>`, Baja:`<span class="badge badge-green">Baja</span>` }[u] || `<span class="badge badge-gray">${u}</span>`);
+const estBadge = e => ({ Activa:`<span class="badge badge-green">Activa</span>`, 'En espera':`<span class="badge badge-amber">En espera</span>`, Cubierta:`<span class="badge badge-blue">Cubierta</span>`, Cancelada:`<span class="badge badge-red">Cancelada</span>` }[e] || `<span class="badge badge-gray">${e}</span>`);
+const candBadge = e => ({ 'En proceso':`<span class="badge badge-blue">En proceso</span>`, 'Descartado':`<span class="badge badge-red">Descartado</span>`, 'Finalista':`<span class="badge badge-green">Finalista</span>`, 'Ingresado':`<span class="badge badge-green">Ingresado</span>`, 'En revisión':`<span class="badge badge-amber">En revisión</span>` }[e] || `<span class="badge badge-gray">${e}</span>`);
+const today = () => new Date().toLocaleDateString('es-AR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+
+/* ===================== DATA FETCH ===================== */
+async function fetchSheets() {
+  if (!S.scriptUrl) return;
+  S.isLoading = true; S.connError = '';
+  $('loading-bar').style.display = 'block';
+  updateSidebar(); render();
+  try {
+    const res = await fetch(S.scriptUrl + '?action=all');
+    const json = await res.json();
+    if (json.ok && json.data) {
+      S.data = { candidatos: json.data.candidatos || [], busquedas: json.data.busquedas || [] };
+      S.isConnected = true;
+    } else {
+      S.connError = json.error || 'Respuesta inesperada';
+      S.isConnected = false;
+    }
+  } catch(e) {
+    S.connError = e.message;
+    S.isConnected = false;
+  }
+  S.isLoading = false;
+  $('loading-bar').style.display = 'none';
+  updateSidebar(); render();
+}
+
+/* ===================== SIDEBAR ===================== */
+function updateSidebar() {
+  const dot = $('conn-dot'), lbl = $('conn-label'), det = $('conn-detail');
+  const C = S.data.candidatos, B = S.data.busquedas;
+  if (S.isLoading) {
+    dot.className = 'conn-dot dot-load'; lbl.textContent = 'Cargando...'; det.textContent = 'Leyendo el Sheets';
+  } else if (S.isConnected) {
+    dot.className = 'conn-dot dot-ok'; lbl.textContent = 'Sheets conectado';
+    det.textContent = `${C.length} candidatos · ${B.filter(b=>b.estado==='Activa').length} búsquedas`;
+  } else if (S.connError) {
+    dot.className = 'conn-dot dot-err'; lbl.textContent = 'Error'; det.textContent = S.connError.substring(0,50);
+  } else {
+    dot.className = 'conn-dot dot-demo'; lbl.textContent = 'Modo demo'; det.textContent = 'Conectá tu Sheets en Config';
+  }
+  const activos = C.filter(c => c.etapa_actual !== 'Descartado' && c.estado !== 'Ingresado').length;
+  $('nb-pipe').textContent = activos;
+  $('nb-cands').textContent = C.length;
+  $('nb-busq').textContent = B.filter(b => b.estado === 'Activa').length;
+}
+
+/* ===================== VIEWS ===================== */
+function renderDash() {
+  const C = S.data.candidatos, B = S.data.busquedas;
+  const activas = B.filter(b => b.estado === 'Activa').length;
+  const enProceso = C.filter(c => c.estado !== 'Descartado' && c.estado !== 'Ingresado').length;
+  const dias = B.filter(b => b.dias_abierta).map(b => Number(b.dias_abierta));
+  const tiempoP = dias.length ? Math.round(dias.reduce((a,b) => a+b, 0) / dias.length) : 0;
+  const scores = C.filter(c => c.score_total && Number(c.score_total) > 0).map(c => Number(c.score_total));
+  const scoreP = scores.length ? Math.round(scores.reduce((a,b) => a+b, 0) / scores.length) : 0;
+  const fuentes = {};
+  C.forEach(c => { const f = c.fuente || 'Otro'; fuentes[f] = (fuentes[f]||0) + 1; });
+  const funnel = ETAPAS.map(e => ({ e, n: C.filter(c => c.etapa_actual === e).length }));
+  const maxF = Math.max(...funnel.map(f => f.n), 1);
+  const urgentes = B.filter(b => b.urgencia === 'Alta' && b.estado === 'Activa');
+
+  $('topbar-container').innerHTML = `
+    <div class="topbar">
+      <div><div class="topbar-title">Inicio</div></div>
+      <div class="topbar-right">
+        <span class="topbar-sub">${today()}</span>
+        ${S.isConnected
+          ? `<span class="tag-sheets"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M9 9v12" stroke="currentColor" stroke-width="2"/></svg>Google Sheets</span>`
+          : `<button class="btn" onclick="go('cfg')">Conectar Sheets →</button>`}
+      </div>
+    </div>`;
+
+  $('content').innerHTML = `
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-label">Búsquedas activas</div><div class="kpi-value">${activas}</div><div class="kpi-sub">de ${B.length} totales</div></div>
+      <div class="kpi-card"><div class="kpi-label">En proceso</div><div class="kpi-value">${enProceso}</div><div class="kpi-sub">${C.filter(c=>c.estado==='Descartado').length} descartados</div></div>
+      <div class="kpi-card"><div class="kpi-label">Tiempo promedio</div><div class="kpi-value">${tiempoP}<span style="font-size:16px;color:var(--txt3)">d</span></div><div class="kpi-sub">días por búsqueda</div></div>
+      <div class="kpi-card"><div class="kpi-label">Score promedio</div><div class="kpi-value">${scoreP || '—'}</div><div class="kpi-sub">sobre 100 puntos</div></div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Embudo del pipeline</div>
+        ${funnel.map(f => `<div class="funnel-row"><div class="funnel-label">${f.e}</div><div class="funnel-track"><div class="funnel-fill" style="width:${f.n > 0 ? Math.round((f.n/maxF)*100) : 0}%"></div></div><div class="funnel-n">${f.n}</div></div>`).join('')}
+      </div>
+      <div class="card">
+        <div class="card-title">Fuente de candidatos</div>
+        ${Object.entries(fuentes).sort((a,b) => b[1]-a[1]).slice(0,6).map(([k,v]) => `<div class="source-row"><div class="source-dot" style="background:${FUENTE_COLORS[k]||'#6b7280'}"></div><div class="source-label">${k}</div><div class="source-val">${v} <span style="color:var(--txt3)">(${Math.round((v/C.length)*100)}%)</span></div></div>`).join('')}
+      </div>
+    </div>
+    <div class="two-equal">
+      <div class="card">
+        <div class="card-title">Búsquedas urgentes</div>
+        ${urgentes.length ? urgentes.map(b => `<div class="q-item"><div><div class="q-name">${b.puesto}</div><div class="q-sub">${b.area} · ${b.modalidad}</div></div><div class="q-tag">${b.dias_abierta}d</div></div>`).join('') : `<div class="empty" style="padding:20px 0">Sin búsquedas urgentes activas</div>`}
+      </div>
+      <div class="card">
+        <div class="card-title">Candidatos recientes</div>
+        ${C.slice(0,4).map(c => { const b = getBusq(c.id_busqueda); return `<div class="q-item"><div class="flex-center"><div class="avatar">${initials(c.nombre,c.apellido)}</div><div><div class="q-name">${c.nombre} ${c.apellido}</div><div class="q-sub">${b.puesto}</div></div></div><div class="q-tag">${c.score_total ? c.score_total+'pts' : '—'}</div></div>`; }).join('')}
+      </div>
+    </div>`;
+}
+
+function renderPipe() {
+  const C = S.data.candidatos;
+  const activos = C.filter(c => c.etapa_actual !== 'Descartado');
+  const descartados = C.filter(c => c.etapa_actual === 'Descartado');
+
+  $('topbar-container').innerHTML = `<div class="topbar"><div><div class="topbar-title">Pipeline</div></div><div class="topbar-right"><span class="topbar-sub">${activos.length} activos · ${descartados.length} descartados</span></div></div>`;
+
+  $('content').innerHTML = `
+    <div class="kanban-scroll"><div class="kanban">
+      ${ETAPAS.map(etapa => {
+        const cards = C.filter(c => c.etapa_actual === etapa);
+        return `<div class="k-col">
+          <div class="k-header">${etapa}<span class="k-count">${cards.length}</span></div>
+          ${cards.map(c => { const b = getBusq(c.id_busqueda); return `<div class="k-card"><div class="k-name">${c.nombre} ${c.apellido}</div><div class="k-pos">${b.puesto}</div><div class="k-meta"><span class="k-fuente">${c.fuente||'—'}</span>${c.score_total ? `<span class="k-score ${scoreClass(c.score_total)}">${c.score_total}</span>` : `<span class="k-score score-no">s/e</span>`}</div></div>`; }).join('')}
+        </div>`;
+      }).join('')}
+      <div class="k-col">
+        <div class="k-header" style="color:var(--red)">Descartados<span class="k-count">${descartados.length}</span></div>
+        ${descartados.map(c => { const b = getBusq(c.id_busqueda); return `<div class="k-card" style="opacity:.5"><div class="k-name">${c.nombre} ${c.apellido}</div><div class="k-pos">${b.puesto}</div><div class="k-meta"><span class="k-fuente">${c.fuente||'—'}</span><span class="k-score score-no">${c.score_total||'—'}</span></div></div>`; }).join('')}
+      </div>
+    </div></div>`;
+}
+
+function renderCands() {
+  const C = S.data.candidatos;
+  const q = S.q.toLowerCase();
+  const filtered = C.filter(c => {
+    const name = (c.nombre+' '+c.apellido).toLowerCase();
+    return (!q || name.includes(q) || (c.dni||'').includes(q))
+      && (!S.filtroEtapa || c.etapa_actual === S.filtroEtapa)
+      && (!S.filtroBusq  || c.id_busqueda === S.filtroBusq);
+  });
+
+  $('topbar-container').innerHTML = `<div class="topbar"><div><div class="topbar-title">Candidatos</div></div><div class="topbar-right"><span class="topbar-sub">${filtered.length} de ${C.length}</span></div></div>`;
+
+  $('content').innerHTML = `
+    <div class="filters">
+      <input placeholder="Buscar por nombre o DNI..." value="${S.q}" oninput="S.q=this.value;renderCands()">
+      <select onchange="S.filtroEtapa=this.value;renderCands()">
+        <option value="">Todas las etapas</option>
+        ${ETAPAS.map(e => `<option value="${e}"${S.filtroEtapa===e?' selected':''}>${e}</option>`).join('')}
+        <option value="Descartado"${S.filtroEtapa==='Descartado'?' selected':''}>Descartado</option>
+      </select>
+      <select onchange="S.filtroBusq=this.value;renderCands()">
+        <option value="">Todas las búsquedas</option>
+        ${S.data.busquedas.map(b => `<option value="${b.id}"${S.filtroBusq===b.id?' selected':''}>${b.puesto}</option>`).join('')}
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Candidato</th><th>DNI</th><th>Teléfono</th><th>Fuente</th><th>Búsqueda</th><th>Etapa</th><th>Estado</th><th>Score</th></tr></thead>
+        <tbody>
+          ${filtered.map(c => { const b = getBusq(c.id_busqueda); return `<tr>
+            <td><div class="flex-center"><div class="avatar">${initials(c.nombre,c.apellido)}</div><span style="font-weight:500">${c.nombre} ${c.apellido}</span></div></td>
+            <td class="mono">${c.dni||'—'}</td>
+            <td class="mono">${c.telefono||'—'}</td>
+            <td>${c.fuente||'—'}</td>
+            <td>${b.puesto}</td>
+            <td>${c.etapa_actual||'—'}</td>
+            <td>${candBadge(c.estado)}</td>
+            <td style="font-weight:600;font-family:var(--mono)">${c.score_total||'—'}</td>
+          </tr>`; }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function renderBusq() {
+  const B = S.data.busquedas, C = S.data.candidatos;
+  $('topbar-container').innerHTML = `<div class="topbar"><div><div class="topbar-title">Búsquedas</div></div><div class="topbar-right"><span class="topbar-sub">${B.filter(b=>b.estado==='Activa').length} activas · ${B.filter(b=>b.estado==='En espera').length} en espera</span></div></div>`;
+  $('content').innerHTML = `
+    <div class="job-grid">
+      ${B.map(b => {
+        const nc = C.filter(c => c.id_busqueda === b.id && c.etapa_actual !== 'Descartado').length;
+        const urgent = b.urgencia === 'Alta' && b.estado === 'Activa';
+        return `<div class="job-card${urgent?' urgent':''}">
+          <div class="job-puesto">${b.puesto}</div>
+          <div class="job-area">${b.area} · ${b.modalidad}</div>
+          <div class="job-badges">${estBadge(b.estado)} ${urgBadge(b.urgencia)}</div>
+          <div class="job-rango">${b.rango_salarial||'—'} <span style="color:var(--txt3)">${b.moneda||''}</span></div>
+          <div class="job-foot"><span>Por ${b.solicitante||'—'}</span><span>${b.dias_abierta||'?'}d · ${nc} cand.</span></div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function renderCfg() {
+  $('topbar-container').innerHTML = `<div class="topbar"><div><div class="topbar-title">Configuración</div></div></div>`;
+  $('content').innerHTML = `
+    <div class="cfg-section">
+      <div class="cfg-title">Conectar Google Sheets</div>
+      <div class="cfg-desc">El dashboard lee los datos de tu Sheets mediante un Apps Script publicado como API. Tus datos quedan en tu cuenta de Google.</div>
+      ${S.connError ? `<div class="cfg-alert cfg-alert-err">${S.connError}</div>` : ''}
+      ${S.isConnected ? `<div class="cfg-alert cfg-alert-ok">Conectado · ${S.data.candidatos.length} candidatos · ${S.data.busquedas.length} búsquedas</div>` : ''}
+      <div class="cfg-label">URL del Apps Script</div>
+      <div class="cfg-hint">La URL que obtenés al publicar el script como aplicación web</div>
+      <input class="cfg-input" id="url-input" placeholder="https://script.google.com/macros/s/..." value="${S.scriptUrl}">
+      <div class="btn-row">
+        <button class="btn btn-accent" onclick="S.scriptUrl=document.getElementById('url-input').value;localStorage.setItem('rr_url',S.scriptUrl);fetchSheets()">Conectar y cargar datos</button>
+        <button class="btn" onclick="S.isConnected=false;S.connError='';S.scriptUrl='';S.data=JSON.parse(JSON.stringify(DEMO));localStorage.removeItem('rr_url');updateSidebar();renderCfg()">Volver a demo</button>
+      </div>
+    </div>
+
+    <div class="cfg-section">
+      <div class="cfg-title">Cómo configurar el Apps Script</div>
+      <div class="cfg-desc">Seguí estos pasos para conectar tu Sheets. Solo hay que hacerlo una vez.</div>
+      <div class="cfg-step"><span class="step-n">1</span>Abrí el Sheets <strong>Reclutamiento_Template</strong> desde Google Drive</div>
+      <div class="cfg-step"><span class="step-n">2</span>Extensiones → Apps Script → pegá el código del archivo <code>dashboard_reclutamiento.gs</code></div>
+      <div class="cfg-step"><span class="step-n">3</span>Implementar → Nueva implementación → Tipo: Aplicación web</div>
+      <div class="cfg-step"><span class="step-n">4</span>Ejecutar como: <strong>Yo mismo</strong> · Quién tiene acceso: <strong>Cualquiera</strong> → Implementar</div>
+      <div class="cfg-step"><span class="step-n">5</span>Autorizá los permisos → copiá la URL generada → pegala arriba</div>
+      <div class="divider"></div>
+      <div class="cfg-label">Endpoints disponibles</div>
+      <table class="endpoints-table">
+        <thead><tr><th>Parámetro</th><th>Descripción</th></tr></thead>
+        <tbody>
+          <tr><td>?action=all</td><td>Todos los datos (default)</td></tr>
+          <tr><td>?action=candidatos</td><td>Solo candidatos</td></tr>
+          <tr><td>?action=busquedas</td><td>Solo búsquedas</td></tr>
+          <tr><td>?action=stats</td><td>KPIs precalculados</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cfg-section">
+      <div class="cfg-title">Estructura del Sheets</div>
+      <div class="cfg-desc">El template tiene las hojas con los nombres exactos que el script espera. No las renombrés.</div>
+      <table class="endpoints-table">
+        <thead><tr><th>Hoja</th><th>Columnas principales</th></tr></thead>
+        <tbody>
+          <tr><td>Candidatos</td><td>ID, Nombre, Apellido, DNI, CUIL, WhatsApp, Fuente, Etapa Actual, Estado, Scores</td></tr>
+          <tr><td>Búsquedas</td><td>ID, Puesto, Área, Urgencia, Estado, Rango, Modalidad, Días Abierta</td></tr>
+          <tr><td>Pipeline</td><td>ID, Candidato, Búsqueda, Fecha, Etapa Anterior, Etapa Nueva, Comentarios</td></tr>
+        </tbody>
+      </table>
+    </div>`;
+}
+
+/* ===================== ROUTER ===================== */
+function go(v) {
+  S.view = v;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const el = $('nav-'+v);
+  if (el) el.classList.add('active');
+  render();
+}
+
+function render() {
+  ({ dash: renderDash, pipe: renderPipe, cands: renderCands, busq: renderBusq, cfg: renderCfg }[S.view] || renderDash)();
+}
+
+/* ===================== INIT ===================== */
+updateSidebar();
+render();
+if (S.scriptUrl) fetchSheets();
+</script>
+</body>
+</html>
